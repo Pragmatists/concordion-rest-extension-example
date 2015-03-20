@@ -1,0 +1,97 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css"></link>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>		
+		<title>List of Invoices</title>
+	</head>
+	<body>
+		<div class="container">
+			<div class="page-header">
+				<h1>Invoices</h1>
+			</div>
+			<div class="col-lg-6">
+				<table class="table invoices">
+					<thead>
+						<th>Invoice #</th>
+						<th>Buyer</th>
+						<th>Items</th>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>	
+			<div class="invoice hide col-lg-6">
+				<h3>Invoice #<span class="invoice-number"></span></h3>
+				<table class="table billing-details">
+					<tr><td>Buyer:</td><td class="contact"></td></tr> 
+					<tr><td>Address Line 1:</td><td class="addressLine1"></td></tr> 
+					<tr><td>Address Line 2:</td><td class="addressLine2"></td></tr>
+				</table>
+				<table class="table line-items">
+					<thead>
+						<th>#</th>
+						<th>Product</th>
+						<th>Qty</th>
+						<th>Price</th>
+						<th>Tax</th>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>	
+			</div>
+		</div>
+		<script>
+
+			var loadInvoice = function(invoiceNumber){
+				
+				$.get("/invoices/" + invoiceNumber, function(invoice) {
+
+					$(".invoice .invoice-number").text(invoice.invoiceNumber);
+					$(".invoice .billing-details .contact").text(invoice.billingDetails.contact);
+					$(".invoice .billing-details .addressLine1").text(invoice.billingDetails.addressLine1);
+					$(".invoice .billing-details .addressLine2").text(invoice.billingDetails.addressLine2);
+					$(".invoice").removeClass("hide");
+
+					$(".invoice .line-items tbody").empty();
+					
+					$.each(invoice.lineItems, function(idx, lineItem){
+
+						var row = $("<tr class='item'></tr>");						
+						
+						row.append($("<td>" + (idx + 1) + "</td>"));
+						row.append($("<td class='product'>" + lineItem.product + "</td>"));
+						row.append($("<td class='qty'>" + lineItem.quantity + "</td>"));
+						row.append($("<td class='price'>" + lineItem.price + "</small></td>"));
+						row.append($("<td class='tax'>" + lineItem.tax + "</small></td>"));
+						
+						$(".invoice .line-items tbody").append(row);
+						
+					});
+
+				});
+			};
+		
+			var loadInvoices = function(){
+				$.get("/invoices", function(invoices) {
+					$.each(invoices, function(idx, invoice){
+
+						var row = $("<tr></tr>");						
+						
+						var link = $("<a>" + invoice.invoiceNumber  + "</a>").click(function(){
+							loadInvoice(invoice.invoiceNumber);
+						});
+						
+						row.append($("<td></td>").append(link));
+						row.append($("<td>" + invoice.billingDetails.contact + "</td>"));
+						row.append($("<td>" + invoice.lineItems.length + "</td>"));
+						
+						$(".invoices tbody").append(row);
+						
+					});
+				});
+			}; 
+			
+			$(document).ready(loadInvoices);
+		</script>
+	</body>
+</html>

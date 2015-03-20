@@ -1,0 +1,26 @@
+<html xmlns:c="http://www.concordion.org/2007/concordion">
+<body class="application">
+	<div class="table-of-contents">
+		<h1>API <small>v0.5</small></h1>
+		<ul class="nav">
+			<li><spec target="detail" href="Hello.html">Hello</spec></li>
+			<li>
+				<spec target="detail" href="invoice/Invoice.html">Invoice</spec>
+				<ul class="nav">
+					<li><spec target="detail" href="invoice/ContentTypes.html">Supported Content-Types</spec></li>
+					<li><spec target="detail" href="invoice/Authorization.html">Authorization</spec></li>
+					<li><spec target="detail" href="invoice/Hateos.html">HATEOS</spec></li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+	<script>
+		if (top.location != location) {
+			top.location.href = document.location.href;
+		}
+	</script>
+	<div class="details">
+		<iframe name="detail"></iframe>
+	</div>
+</body>
+</html>

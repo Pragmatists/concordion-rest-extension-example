@@ -1,0 +1,207 @@
+<html
+	xmlns:c="http://www.concordion.org/2007/concordion">
+<body>
+
+	<style>
+		svg text {
+			font-family: monospace;
+			text-anchor: middle;
+			font-size: 12px;
+		}
+		svg circle {
+			fill: #fff;
+			stroke: #000;
+			stroke-width: 2px;				
+		}
+		svg path.link {
+			stroke-width: 2px;
+			stroke: #009900; 
+			fill:none;
+		}
+		svg .link text {
+			font-size: 11px;
+		}
+		svg .success path {
+			stroke: #009900; 
+		}
+		svg .failure path {
+			stroke: #990000; 
+		}
+		svg .failure path.link {
+			stroke-dasharray: 5 5;
+		}
+		svg .success path.arrow {
+			fill: #009900; 
+		}
+		svg .failure path.arrow {
+			fill: #990000; 
+		}
+		
+		svg text.success {
+			fill: #009900; 
+		}
+		svg text.failure {
+			fill: #990000; 
+		}
+		svg rect.link-bg {
+			fill: #ffffff;
+		}
+	</style>
+
+	<h2>Support for HATEOS</h2>
+				
+	<example name="Hypermedia for Invoices">
+		
+		Given following Invoices are available: <ul c:execute="createInvoices(#start, #end)">
+			<li>INV.2015.<b c:set="#start">01</b></li>
+			<span>...</span>
+			<li>INV.2015.<b c:set="#end">20</b></li></ul>
+		Then <b>application state graph</b> should look like:		 
+		<svg height="700" width="700">
+
+			<g class="endpoint" transform="translate(50, 100)" c:execute="get(#url)">
+				<text x="0" y="30" c:set="#url">/</text>
+				<g class="link" c:execute="#target = followLink(#href)">
+					<g c:assertEquals="#target">/invoices</g>
+					<text c:set="#href">_links.invoices</text>
+				</g>
+				<circle cx="0" cy="0" r="8"></circle>
+			</g>
+			
+			<g class="endpoint" transform="translate(250, 100)" c:execute="get(#url)">
+				<text x="0" y="30" c:set="#url">/invoices</text>
+				<g class="link" c:execute="#target = followLink(#href)">
+					<g c:assertEquals="#target">/invoices/INV.2015.01</g>
+					<text c:set="#href">[0]._links.href</text>
+				</g>
+				<g class="link" c:execute="#target = followLink(#href)">
+					<g c:assertEquals="#target">/invoices/INV.2015.02</g>
+					<text c:set="#href">[1]._links.href</text>
+				</g>
+				<g class="link" c:execute="#target = followLink(#href)">
+					<g c:assertEquals="#target">/invoices/INV.2015.10</g>
+					<text c:set="#href">[9]._links.href</text>
+				</g>
+				<g class="link" c:execute="#target = followLink(#href)">
+					<g c:assertEquals="#target">/invoices?page=2</g>
+					<text c:set="#href">_links.more</text>
+				</g>
+				<circle cx="0" cy="0" r="8"></circle>
+			</g>
+
+			<g class="endpoint" transform="translate(250, 400)" c:execute="get(#url)">
+				<text x="0" y="30" c:set="#url">/invoices?page=2</text>
+				<g class="link" c:execute="#target = followLink(#href)">
+					<g c:assertEquals="#target">/invoices/INV.2015.11</g>
+					<text c:set="#href">[0]._links.href</text>
+				</g>
+				<g class="link" c:execute="#target = followLink(#href)">
+					<g c:assertEquals="#target">/invoices/INV.2015.12</g>
+					<text c:set="#href">[1]._links.href</text>
+				</g>
+				<g class="link" c:execute="#target = followLink(#href)">
+					<g c:assertEquals="#target">/invoices/INV.2015.20</g>
+					<text c:set="#href">[9]._links.href</text>
+				</g>
+				<circle cx="0" cy="0" r="8"></circle>
+			</g>
+			
+			<g class="endpoint" transform="translate(600, 50)">
+				<circle cx="0" cy="0" r="8"></circle>
+				<text x="0" y="30">/invoices/INV.2015.01</text>
+			</g>
+			
+			<g class="endpoint" transform="translate(600, 150)">
+				<circle cx="0" cy="0" r="8"></circle>
+				<text x="0" y="30">/invoices/INV.2015.02</text>
+			</g>
+
+			<g class="endpoint" transform="translate(600, 250)">
+				<circle cx="0" cy="0" r="8"></circle>
+				<text x="0" y="30">/invoices/INV.2015.10</text>
+			</g>
+			
+			<g class="endpoint" transform="translate(600, 350)">
+				<circle cx="0" cy="0" r="8"></circle>
+				<text x="0" y="30">/invoices/INV.2015.11</text>
+			</g>
+
+			<g class="endpoint" transform="translate(600, 450)">
+				<circle cx="0" cy="0" r="8"></circle>
+				<text x="0" y="30">/invoices/INV.2015.12</text>
+			</g>
+
+			<g class="endpoint" transform="translate(600, 550)">
+				<circle cx="0" cy="0" r="8"></circle>
+				<text x="0" y="30">/invoices/INV.2015.20</text>
+			</g>			
+		</svg>
+	</example>
+	<script>
+
+		var extractPosition = function(node){
+			var r = /.*translate\((\d+),\s*(\d+)\).*/;
+			var groups = r.exec($(node).attr("transform"));
+
+			if(groups){
+				return {
+					x: groups[1],
+					y: groups[2]
+				};
+			}
+			return {
+				x: 0,
+				y: 0
+			};
+		};
+		
+
+		var drawArrows = function(){
+
+			var target = $(this).text().trim();
+			
+			var targetNode = $("svg text").contents().filter(function(){
+				return $(this).text() == target;}
+			).parents("g.endpoint")[0];
+			
+			console.log('targetNode', target, targetNode);
+			
+			var thisPos = extractPosition($(this).parents("g.endpoint")[0]);
+			var targetPos = extractPosition(targetNode);
+			
+			var relPos = {
+				x: targetPos.x - thisPos.x,
+				y: targetPos.y - thisPos.y
+			};
+			
+			var classes = $(this).closest("g").attr("class");
+			
+			var label = $(this).closest("g.link").find("text");
+			var l = label.text().trim().length * 7;
+			
+			label
+				.attr("class", classes)
+				.attr("x", relPos.x/3)
+				.attr("y", relPos.y/3 - 5);
+
+			$(this).closest("g")
+				.append($("<path/>").addClass("link").attr("d","M0,0 c100,0 " + (relPos.x-200) + "," + relPos.y + " " + relPos.x + "," + relPos.y + ""))
+				.append($("<path/>").addClass("arrow").attr("d","M" + (relPos.x-10) + "," + relPos.y + " l-10,-5 l0,10 Z"))
+				.append($("<rect/>").addClass("link-bg").attr("x", relPos.x/3 - l/2).attr("y", relPos.y/3 - 17).attr("width", l).attr("height", 16));
+		};
+		
+		$("svg g.success").each(drawArrows);
+		$("svg g.failure del").each(drawArrows);
+		
+		$.fn.xml = function() {
+		    return (new XMLSerializer()).serializeToString(this[0]);
+		};
+	
+		$.fn.DOMRefresh = function() {
+		    return $($(this.xml()).replaceAll(this));
+		};
+	
+		$("svg").DOMRefresh();
+	</script>	
+</body>
+</html>

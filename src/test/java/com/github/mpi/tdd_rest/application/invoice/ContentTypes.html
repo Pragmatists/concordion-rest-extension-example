@@ -1,0 +1,73 @@
+<html
+	xmlns:c="http://www.concordion.org/2007/concordion">
+<body>
+
+	<h2>Supported Content-Types</h2>
+		
+	<background>
+		Given there is a Invoice:
+		<div class="invoice">Invoice no.: <b c:execute="#invoice = createInvoice(#TEXT)">INV.2015.01</b>
+		
+			Bill To:
+	    	<div class="billing-details" c:execute="billTo(#invoice, #name, #address1, #address2)">
+	            <b c:set="#name">Sherlock Holmes</b>
+	            <b c:set="#address1">London</b>
+	            <b c:set="#address2">Baker Street 221b</b>
+		    </div>
+		    
+		    Items:
+		    <table c:execute="addLineItem(#invoice, #product, #quantity, #price, #tax)">
+		    	<tr>
+		    		<th c:set="#product">Product</th>
+		    		<th c:set="#quantity">Qty</th>
+		    		<th c:set="#price">Price</th>
+		    		<th c:set="#tax">Tax</th>
+		    	</tr>
+		    	<tr>
+				     <td>Cap</td><td>1</td><td>12.49</td><td>23%</td>
+		    	</tr>
+		    	<tr>
+				     <td>Pipe</td><td>2</td><td>5.49</td><td>23%</td>
+		    	</tr>
+		    </table></div>
+	</background>	
+		
+	<example name="Retrieving Invoice as PDF">
+		When I ask for resource with <get><url>/invoices/INV.2015.01</url> using <b c:set="#header">Accept</b> set to <setHeader name="Accept">application/pdf</setHeader></get>
+		Then response code should be <status>HTTP/1.1 200 OK</status>
+		And response <b>Content-Type</b> should be equal to <header name="Content-Type">application/pdf</header>
+		And response should contain following <a c:execute="saveAs(#HREF)" href="attachment.pdf">PDF</a>
+				
+	</example>	
+	
+	<example name="Retrieving Invoice as XML">
+		When I ask for resource with <get><url>/invoices/INV.2015.01</url> using <b c:set="#header">Accept</b> set to <setHeader name="Accept">application/xml</setHeader></get>
+		Then response code should be <status>HTTP/1.1 200 OK</status>
+		And response <b>Content-Type</b> should be equal to <header name="Content-Type">application/xml</header>
+		And response should contain following data <responseXml>
+<invoice>	
+	<number>INV.2015.01</number>
+	<billingDetails>
+		<contact>Sherlock Holmes</contact>
+		<addressLine1>London</addressLine1>
+		<addressLine2>Baker Street 221b</addressLine2>
+	</billingDetails>
+	<items>
+		<item>
+			<product>Cap</product>
+			<quantity>1</quantity>
+			<price>12.49 EUR</price>
+			<tax>23%</tax>
+		</item>
+		<item>
+			<product>Pipe</product>
+			<quantity>2</quantity>
+			<price>5.49 EUR</price>
+			<tax>23%</tax>
+		</item>
+	</items>
+</invoice>
+		</responseXml>		
+	</example>		
+</body>
+</html>

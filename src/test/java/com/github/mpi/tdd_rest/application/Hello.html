@@ -1,0 +1,37 @@
+<html xmlns:c="http://www.concordion.org/2007/concordion">
+<body>
+
+	<h2>Hello</h2>
+
+	<background>
+		Hello its me <b c:echo="inc()">hello</b>!
+	</background>	
+	<example name="Greeting">
+		When I <post><url>/hello</url> with follwing body <jsonRequest>
+			{
+				"name": "World"
+			}
+		</jsonRequest></post>		
+		Then I should receive <status>HTTP/1.1 200 OK</status>
+		with body <responseJson>
+			{
+				"greeeting": "Hello, World!"
+			}
+		</responseJson>					
+	</example>
+	<example name="Greeting">
+		When I <post><url>/hello</url> with follwing body <jsonRequest>
+			{
+				"name": "World"
+			}
+		</jsonRequest></post>		
+		Then I should receive <status>HTTP/1.1 200 OK</status>
+		with body <responseJson>
+			{
+				"greeeting": "Hello, World!"
+			}
+		</responseJson>					
+	</example>
+
+</body>
+</html>
