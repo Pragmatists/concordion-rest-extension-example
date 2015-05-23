@@ -1,26 +1,36 @@
 apply plugin: 'java'
+apply plugin: 'org.ajoberstar.github-pages'
 
-ext {
-	hibernateVersion = '4.3.5.Final'
-    springBootVersion = '1.1.9.RELEASE'
-    springVersion = '4.0.2.RELEASE'
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.ajoberstar:gradle-git:1.1.0'
+    }
 }
-
+ext {
+    springBootVersion = '1.1.9.RELEASE'
+}
 
 repositories { 
     mavenCentral()
+    mavenLocal()
+}
+
+sourceSets {
+    test {
+        resources.srcDir file('src/test/java')
+    }
 }
 
 sourceCompatibility = 1.8
 
 dependencies {
 
-	compile 'org.slf4j:slf4j-log4j12:1.6.1'
-
-    compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion") {
-        exclude module: "spring-boot-starter-tomcat"
-    }
-    compile("org.springframework.boot:spring-boot-starter-jetty:$springBootVersion")
+    compile "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
+	compile 'commons-io:commons-io:2.4'
 
   	compile 'com.itextpdf:itextpdf:5.4.2'
 	compile 'com.itextpdf.tool:xmlworker:5.4.1'
@@ -28,12 +38,30 @@ dependencies {
     testCompile "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
 
 	testCompile 'junit:junit:4.11'
-	testCompile "org.springframework:spring-test:$springVersion"
-    testCompile 'org.assertj:assertj-core:1.5.0'
-    testCompile 'com.jayway.restassured:rest-assured:2.4.0'
- 	testCompile 'org.seleniumhq.selenium:selenium-java:2.44.0'
- 	
- 	testCompile 'org.unitils:unitils-core:3.4.2'
- 	testCompile project(':concordion-rest');
-
+    testCompile "org.concordion:concordion:1.4.6"
+    testCompile "pl.pragmatists:concordion-rest-extension:0.5.0"
 }
+
+test {
+    group 'Concordion tests'
+    description = "Run Concordion"
+    systemProperty 'concordion.output.dir', "$buildDir/reports/concordion"
+	ignoreFailures = true
+}
+
+githubPages {
+    repoUri = 'git@github.com:Pragmatists/concordion-rest-extension-example.git'
+    pages {
+        from 'build/reports/concordion'
+    }
+}
+
+task createIndex(type: Copy) {
+    from('src/test/resources') {
+    	include 'index.html'
+    }
+    into 'build/reports/concordion/'
+}
+
+publishGhPages.dependsOn test
+publishGhPages.dependsOn createIndex

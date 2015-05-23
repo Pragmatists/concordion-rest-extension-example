@@ -1,0 +1,192 @@
+<html 
+	xmlns:c="http://www.concordion.org/2007/concordion" 
+	xmlns:r="http://pragmatists.github.io/concordion-rest-extension"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://pragmatists.github.io/concordion-rest-extension http://pragmatists.github.io/concordion-rest-extension/xsd/concordion-rest.xsd">
+<body class="container">
+
+	<h2 class="page-header">Todo List Endpoint</h2>
+ 	
+ 	<div class="alert alert-success" role="alert">
+ 		This is a sample <a href="http://www.concordion.org">Concordion</a> specification page demonstrating features of the
+ 		<a href="http://github.com/Pragmatists/concordion-rest-extension">Concordion REST</a> extension. 
+ 	</div>
+ 	
+ 	<div>
+ 		<strong>To-Do List Endpoint</strong> is a rich RESTful API that enables you to manage your day-to-day tasks. <br/>
+ 		Currently, following operations are supported:
+ 		<ul>
+ 			<li><a href="#create">Create To-Do item</a></li>
+ 			<li><a href="#fetch_single">Fetch particular To-Do item</a></li>
+ 			<li><a href="#complete">Complete To-Do item</a></li>
+ 			<li><a href="#delete">Delete To-Do item</a></li>
+ 			<li><a href="#fetch_list">Fetch entire To-Do list</a></li>
+ 			<li><a href="#export_as_pdf">Export To-Do list in PDF format</a></li>
+ 			<li><a href="#export_as_xml">Export To-Do list in XML format</a></li>
+ 		</ul>
+ 	</div>
+ 	
+ 	<h3>Examples: </h3>
+	<div id="create" class="panel panel-default" c:execute="clearItems()">
+		<div class="panel-heading"><b>Creating To-Do item</b></div>
+		<div class="panel-body">
+			<r:request>		
+				
+				When I send <r:post>/tasks</r:post> with following body
+				(using <r:setHeader name="Content-Type">application/json</r:setHeader>) 
+				<r:jsonBody>
+					{
+						"description": "Buy the milk",
+						"priority": 3
+					}
+				</r:jsonBody>
+				Then I should receive <r:status>HTTP/1.1 201 Created</r:status> with response header <r:header name="Location">/tasks/1</r:header>		
+			</r:request>
+		</div>
+	</div>
+	<div id="fetch_single" class="panel panel-default" c:execute="clearItems()">
+		<div class="panel-heading"><b>Fetchnig To-Do item</b></div>
+		<div class="panel-body">
+		 	<div class="alert alert-warning well-sm" role="alert">
+		 		<strong>Warning:</strong> This example was intentionally left failing in order to demonstrate JSON comparition view feature. 
+		 	</div>
+			<r:request>
+				When I <r:success>successfully</r:success> send <r:post>/tasks</r:post> with following body
+				(using <r:setHeader name="Content-Type">application/json</r:setHeader>) 
+				<r:jsonBody>
+					{
+						"description": "Walk the dog"
+					}
+				</r:jsonBody>		
+			</r:request>
+			<r:request>
+				Then <r:get>/tasks/1</r:get> should return <r:status>HTTP/1.1 200 OK</r:status> with response containing:
+				<r:jsonResponse>
+					{"task_id": 1, "completed": false, "description": "Walk the dog", "priority": 1}
+				</r:jsonResponse>
+			</r:request>
+		</div>
+	</div>
+	<div id="complete" class="panel panel-default" c:execute="clearItems()">
+		<div class="panel-heading"><b>Completing To-Do item</b></div>
+		<div class="panel-body">
+			<span c:execute="#taskID = newItem()">Given there is pending To-Do item with id <b c:echo="#taskID"></b></span>
+			<r:request>
+				When I send <r:post>/tasks/1/complete</r:post> <br/>
+				Then I should receive <r:status>HTTP/1.1 200 OK</r:status>
+			</r:request>
+			<r:request>
+				And <r:get>/tasks/1</r:get> should return <r:status>HTTP/1.1 200 OK</r:status> with response containing:
+				<r:jsonResponse>
+					{"task_id": 1, "completed": true}
+				</r:jsonResponse>
+			</r:request>
+		</div>
+	</div>
+	<div id="delete" class="panel panel-default" c:execute="clearItems()">
+		<div class="panel-heading"><b>Deleting To-Do item</b></div>
+		<div class="panel-body">
+		 	<div class="alert alert-warning well-sm" role="alert">
+		 		<strong>Warning:</strong> This example was intentionally left failing in order to demonstrate HTTP status comparition feature. 
+		 	</div>
+			<span c:execute="#taskID = newItem()">Given there is To-Do item with id <b c:echo="#taskID"></b></span>
+			<r:request>
+				When I send <r:delete>/tasks/1</r:delete> <br/>
+				Then I should receive <r:status>HTTP/1.1 200 OK</r:status>
+			</r:request>
+			<r:request>
+				And <r:get>/tasks/1</r:get> should return <r:status>HTTP/1.1 404 Not Found</r:status> 
+			</r:request>
+		</div>
+	</div>	
+
+	<div c:execute="clearItems()">
+		Given there are following tasks:
+		<table class="table" c:execute="#taskID = newItem(#description, #priority, #completed)">
+			<thead>
+				<tr>
+					<th c:echo="#taskID">TaskID</th>
+					<th c:set="#description">Description</th>
+					<th c:set="#priority">Priority</th>
+					<th c:set="#completed">Completed</th>
+				</tr>
+			</thead>
+			<tr>
+				<td></td>
+				<td>Buy the milk</td>
+				<td>1</td>
+				<td>Y</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>Walk the dog</td>
+				<td>3</td>
+				<td>N</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>Visit the gym</td>
+				<td>2</td>
+				<td>N</td>
+			</tr>
+		</table>
+	</div>
+	<div id="fetch_list" class="panel panel-default">
+		<div class="panel-heading"><b>Listing To-Do items as JSON (default)</b></div>
+		<div class="panel-body">
+			<r:request>
+				When I send <r:get>/tasks</r:get> <br/>
+				Then I should receive <r:status>HTTP/1.1 200 OK</r:status> with response containing:
+				<r:jsonResponse>
+					{
+						"tasks": [
+							{ "task_id": 1, "description": "Buy the milk", "priority": 1, "completed": true },
+							{ "task_id": 2, "description": "Walk the dog", "priority": 3, "completed": false },
+							{ "task_id": 3, "description": "Visit the gym", "priority": 2, "completed": false }
+						]
+					}
+				</r:jsonResponse> 
+			</r:request>
+		</div>
+	</div>	
+	<div id="export_as_pdf" class="panel panel-default">
+		<div class="panel-heading"><b>Listing To-Do items as PDF</b></div>
+		<div class="panel-body">
+			<r:request>
+				When I send <r:get>/tasks</r:get> with <r:setHeader name="Accept">application/pdf</r:setHeader><br/>
+				Then I should receive <r:attachment>todo-list.pdf</r:attachment> 
+				with <r:header name="Content-Type">application/pdf</r:header> and header <r:header name="Content-Disposition">attachment; filename=todo-list.pdf</r:header>
+			</r:request>
+		</div>
+	</div>	
+	<div id="export_as_xml" class="panel panel-default">
+		<div class="panel-heading"><b>Listing To-Do items as XML</b></div>
+		<div class="panel-body">
+		 	<div class="alert alert-warning well-sm" role="alert">
+		 		<strong>Warning:</strong> This example was intentionally left failing in order to demonstrate HTTP header comparition feature. 
+		 	</div>
+			<r:request>
+				When I send <r:get>/tasks</r:get> with <r:setHeader name="Accept">application/xml</r:setHeader><br/>
+				Then I should receive <r:status>HTTP/1.1 200 OK</r:status> with <r:header name="Content-Type">application/xml</r:header> 
+				and response body containing:
+				<r:xmlResponse>
+					<todo-list>
+						<todo-item task-id="1" completed="true">
+							<priority>1</priority>
+							<description>Buy the milk</description>
+						</todo-item>
+						<todo-item task-id="2" completed="false">
+							<priority>3</priority>
+							<description>Walk the dog</description>
+						</todo-item>
+						<todo-item task-id="3" completed="false">
+							<priority>2</priority>
+							<description>Visit the gym</description>
+						</todo-item>
+					</todo-list>
+				</r:xmlResponse> 
+			</r:request>
+		</div>
+	</div>	
+</body>
+</html>

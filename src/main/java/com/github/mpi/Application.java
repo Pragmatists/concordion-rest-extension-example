@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Application extends WebMvcConfigurerAdapter {
 
     public static void main(String[] args) {
-        System.setProperty("spring.profiles.active", "demo");
         SpringApplication.run(Application.class, args);
     }
 
