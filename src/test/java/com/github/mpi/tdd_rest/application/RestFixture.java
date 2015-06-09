@@ -13,6 +13,6 @@ public abstract class RestFixture {
     @Extension
     public RestExtension rest = new RestExtension()
                                         .enableCodeMirror()
-                                        .includeBoostrap();
+                                        .includeBootstrap();
     
 }
