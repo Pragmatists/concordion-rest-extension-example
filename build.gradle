@@ -39,7 +39,7 @@ dependencies {
 
 	testCompile 'junit:junit:4.11'
     testCompile "org.concordion:concordion:1.4.6"
-    testCompile "pl.pragmatists:concordion-rest-extension:0.5.0"
+    testCompile "pl.pragmatists:concordion-rest-extension:0.5.1"
 }
 
 test {
